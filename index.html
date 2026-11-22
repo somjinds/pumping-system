@@ -1,0 +1,91 @@
+<!doctype html>
+<html lang="th">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <meta name="theme-color" content="#12395b" />
+    <title>PumpingSystem</title>
+    <style>
+      body { font-family: system-ui, "Segoe UI", Tahoma, sans-serif; margin: 0; background: #f4f6f8; color: #1f2933; }
+      header { background: #12395b; color: #fff; padding: 10px 16px; display: flex; flex-wrap: wrap; gap: 12px; align-items: center; }
+      header h1 { font-size: 18px; margin: 0; }
+      header .app-fs { display: inline-flex; flex-wrap: wrap; gap: 8px; align-items: center; }
+      header .app-fs-btn { font-size: 13px; padding: 4px 10px; background: transparent; color: #fff; border-color: #c3d1e0; }
+      .unit-bar { margin-left: auto; display: flex; gap: 8px; align-items: center; flex-wrap: wrap; font-size: 13px; }
+      .unit-sel { display: flex; gap: 4px; align-items: center; color: #fff; margin: 0; }
+      .tabs { display: flex; flex-wrap: wrap; gap: 4px; padding: 8px 16px 0; } /* wraps on a phone instead of widening the page */
+      .table-scroll { overflow-x: auto; max-width: 100%; } /* a wide table scrolls inside itself, not the page */
+      .tab-btn { border: 1px solid #cbd2d9; border-bottom: none; background: #e4e7eb; padding: 8px 14px; border-radius: 6px 6px 0 0; cursor: pointer; }
+      .tab-btn.on { background: #fff; font-weight: 600; }
+      main { padding: 0 16px 16px; }
+      .tab { display: none; background: #fff; border: 1px solid #cbd2d9; padding: 12px; }
+      .two { display: grid; grid-template-columns: minmax(320px, 1fr) minmax(320px, 1fr); gap: 12px; }
+      /* Speed tab: chart gets 2/3 of the width, controls 1/3 (layout choice: the analysis is chart-centred). */
+      .two.chart-wide { grid-template-columns: minmax(260px, 1fr) minmax(360px, 2fr); }
+      /* minmax(0, 1fr) + min-width 0: a wide table scrolls inside its card instead of widening the phone column. */
+      .two > * { min-width: 0; }
+      @media (max-width: 800px) { .two, .two.chart-wide { grid-template-columns: minmax(0, 1fr); } }
+      .card { border: 1px solid #e4e7eb; border-radius: 6px; padding: 12px; margin-bottom: 12px; background: #fff; }
+      .card h2 { font-size: 15px; margin: 0 0 8px; }
+      .row { display: flex; gap: 12px; flex-wrap: wrap; }
+      .row > div { flex: 1; min-width: 120px; }
+      label { display: block; font-size: 12px; color: #52606d; margin-bottom: 2px; }
+      input, select, textarea { font: inherit; padding: 4px 6px; box-sizing: border-box; }
+      .row input, .row select { width: 100%; }
+      textarea { width: 100%; }
+      table { border-collapse: collapse; width: 100%; font-size: 13px; }
+      td, th { padding: 3px 6px; border-bottom: 1px solid #eef0f2; text-align: left; }
+      td input { width: 100%; }
+      .btn { padding: 6px 12px; border: 1px solid #9aa5b1; border-radius: 4px; background: #fff; cursor: pointer; }
+      .btn.ok { background: #1b7a3d; color: #fff; border-color: #1b7a3d; }
+      .btn.warn { background: #b45309; color: #fff; border-color: #b45309; }
+      .btn:disabled { opacity: 0.45; cursor: not-allowed; }
+      .badge { padding: 1px 8px; border-radius: 10px; font-size: 12px; }
+      .b-ok { background: #d9f2e1; color: #14532d; }
+      .b-warn { background: #fde8c8; color: #7c3a00; }
+      .small { font-size: 12px; color: #627d98; }
+      header .small { color: #c3d1e0; }
+      .msg-bad { color: #9b1c1c; font-size: 13px; }
+      .msg-warn { color: #92400e; font-size: 13px; }
+      .file-menu { padding: 6px 16px; }
+      .file-bar, .wrap-btns { display: flex; flex-wrap: wrap; gap: 8px; align-items: center; }
+      .file-msgs:empty { display: none; }
+      footer { padding: 8px 16px; }
+      .selected-row { background: #eaf2fb; }
+      .modal-back { position: fixed; inset: 0; background: rgba(0, 0, 0, 0.45); z-index: 50; overflow: auto; padding: 16px; }
+      .modal { background: #fff; max-width: 980px; margin: 0 auto; border-radius: 8px; padding: 16px; }
+      .modal h2 { font-size: 15px; margin: 0 0 8px; }
+      .steps { display: flex; gap: 6px; flex-wrap: wrap; margin-bottom: 12px; }
+      .step { padding: 2px 10px; border-radius: 10px; background: #eef0f2; font-size: 12px; color: #52606d; }
+      .export-bar { display: flex; flex-wrap: wrap; gap: 8px; align-items: center; margin: 6px 0; }
+      /* Print / "Save as PDF": only the open tab (the other tabs are display:none), without controls. */
+      @media print {
+        body { background: #fff; }
+        header, .file-menu, .tabs, footer, .modal-back, .export-bar, .btn, button, input[type="range"] { display: none !important; }
+        main { padding: 0; }
+        .tab { border: none; padding: 0; }
+        .card { break-inside: avoid; border-color: #ccc; }
+      }
+      /* Number box with up / down buttons (src/ui/spinner.ts): the box shrinks, the buttons keep a 32 px touch target. */
+      .spin { display: flex; align-items: stretch; gap: 2px; min-width: 0; }
+      .spin > input { flex: 1 1 0; width: auto; min-width: 0; }
+      .spin-btn { flex: none; width: 32px; min-height: 32px; padding: 0; border: 1px solid #9aa5b1; border-radius: 4px; background: #fff; cursor: pointer; font-size: 12px; line-height: 1; touch-action: manipulation; user-select: none; }
+      .spin-btn:active { background: #e4e7eb; }
+      .spin-btn:disabled { opacity: 0.4; cursor: default; }
+      /* Full screen for a chart block (src/ui/fullscreen.ts). Drawing choices: the plot gets the viewport height minus
+         ~170 px for the button row, export buttons and scale boxes (min 300 px); !important beats the inline height. */
+      .fs-row { display: flex; justify-content: flex-end; margin-bottom: 4px; }
+      .fs-btn { min-height: 32px; }
+      .chart-block:fullscreen, .chart-block.fs-fallback { background: #f4f6f8; padding: 12px; overflow: auto; box-sizing: border-box; }
+      .chart-block.fs-fallback { position: fixed; inset: 0; z-index: 40; }
+      .chart-block:fullscreen .plot-host, .chart-block.fs-fallback .plot-host { height: calc(100vh - 170px) !important; min-height: 300px; }
+      @supports (height: 100dvh) { .chart-block:fullscreen .plot-host, .chart-block.fs-fallback .plot-host { height: calc(100dvh - 170px) !important; } }
+      @media print { .fs-row, .scale-bar { display: none; } }
+      .step-on { background: #1b4f8a; color: #fff; }
+    </style>
+    <script type="module" crossorigin src="./assets/index-D3Fe3TK4.js"></script>
+  <link rel="manifest" href="./manifest.webmanifest"></head>
+  <body>
+    <div id="app"></div>
+  </body>
+</html>
