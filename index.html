@@ -66,10 +66,21 @@
         .tab { border: none; padding: 0; }
         .card { break-inside: avoid; border-color: #ccc; }
       }
-      /* Number box with up / down buttons (src/ui/spinner.ts): the box shrinks, the buttons keep a 32 px touch target. */
-      .spin { display: flex; align-items: stretch; gap: 2px; min-width: 0; }
-      .spin > input { flex: 1 1 0; width: auto; min-width: 0; }
-      .spin-btn { flex: none; width: 32px; min-height: 32px; padding: 0; border: 1px solid #9aa5b1; border-radius: 4px; background: #fff; cursor: pointer; font-size: 12px; line-height: 1; touch-action: manipulation; user-select: none; }
+      /* Number box with up / down buttons (src/ui/spinner.ts). Drawing choices (user decision 2026-11-24): the box is a
+         fixed ~9 characters wide (not stretched across the row); the buttons are two small stacked buttons at its right.
+         On a touch screen (pointer: coarse) they stay side by side with a 32 px touch target. */
+      .spin { display: inline-flex; align-items: stretch; gap: 2px; min-width: 0; max-width: 100%; vertical-align: middle; }
+      /* ~9 characters is the preferred width; the box may shrink (never the buttons) when its wrapper is narrower, e.g. a
+         fixed-width wrapper on the Speed tab with 32 px touch buttons, so the buttons never spill over the text beside it. */
+      .spin > input, .row .spin > input { flex: 0 1 calc(9ch + 14px); width: auto; min-width: 0; }
+      .spin-btns { flex: none; }
+      .row > div:has(> .spin) { flex: 0 1 auto; }
+      .spin-btns { display: flex; flex-direction: column; gap: 1px; }
+      .spin-btn { flex: 1 1 0; width: 20px; min-height: 0; padding: 0; border: 1px solid #9aa5b1; border-radius: 3px; background: #fff; cursor: pointer; font-size: 8px; line-height: 1; touch-action: manipulation; user-select: none; }
+      @media (pointer: coarse) {
+        .spin-btns { flex-direction: row; gap: 2px; }
+        .spin-btn { width: 32px; min-height: 32px; font-size: 12px; border-radius: 4px; }
+      }
       .spin-btn:active { background: #e4e7eb; }
       .spin-btn:disabled { opacity: 0.4; cursor: default; }
       /* Full screen for a chart block (src/ui/fullscreen.ts). Drawing choices: the plot gets the viewport height minus
@@ -83,7 +94,7 @@
       @media print { .fs-row, .scale-bar { display: none; } }
       .step-on { background: #1b4f8a; color: #fff; }
     </style>
-    <script type="module" crossorigin src="./assets/index-BIiIXJXI.js"></script>
+    <script type="module" crossorigin src="./assets/index-xOtoZ_lH.js"></script>
   <link rel="manifest" href="./manifest.webmanifest"></head>
   <body>
     <div id="app"></div>
