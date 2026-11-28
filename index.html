@@ -25,6 +25,8 @@
       /* minmax(0, 1fr) + min-width 0: a wide table scrolls inside its card instead of widening the phone column. */
       .two > * { min-width: 0; }
       @media (max-width: 800px) { .two, .two.chart-wide { grid-template-columns: minmax(0, 1fr); } }
+      /* Energy tab on a phone (one column): help note, results, then the load profile (spec order); side by side on a wide screen. */
+      @media (max-width: 800px) { .energy-left { display: contents; } .energy-left > * { min-width: 0; } #energy-results { order: 1; } #energy-profile-host { order: 2; } }
       .card { border: 1px solid #e4e7eb; border-radius: 6px; padding: 12px; margin-bottom: 12px; background: #fff; }
       .card h2 { font-size: 15px; margin: 0 0 8px; }
       .row { display: flex; gap: 12px; flex-wrap: wrap; }
@@ -94,7 +96,7 @@
       @media print { .fs-row, .scale-bar { display: none; } }
       .step-on { background: #1b4f8a; color: #fff; }
     </style>
-    <script type="module" crossorigin src="./assets/index-DBHkedUZ.js"></script>
+    <script type="module" crossorigin src="./assets/index-24TWcZG7.js"></script>
   <link rel="manifest" href="./manifest.webmanifest"></head>
   <body>
     <div id="app"></div>
